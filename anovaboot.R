@@ -115,6 +115,7 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
   fullModMat <- model.matrix(formula, data=data)[,]
   SS.list <- anovaMod$'Mean Sq'
   df.list <- anovaMod$Df
+  termNames <- row.names(anovaMod) 
   df.len <- length(df.list)
   modelMat.list <- list()
   modelMat.list[[1]] <- matrix(fullModMat[, 1], ncol=1)
@@ -241,17 +242,23 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
     
   }
   
+  pvalues <- rep(NA, df.len-1)
+  for (i in 1:(df.len-1)) {
+    pvalues[i] <- mean(bootFStats[,i] > obsFStats[i])
+  }
+  
   end <- proc.time()
   print(end-start)
   if (keep.data == TRUE) {
-    structure(invisible(list(df= df.list, bootFStats=bootFStats, 
+    structure(invisible(list(terms = termNames,df = df.list, bootFStats=bootFStats, 
                              origSSE=SS.list[length(SS.list)], origSSTr=SS.list[1:(length(SS.list)-1)],
                              bootSSE=bootSSEMat, bootSSTr=bootSSTrMat,
-                             origEstParam=estParam, origFStats=obsFStats, bootResponse=bootResponseMatrix.list)))
+                             origFStats=obsFStats, "p-values" = pvalues,
+                             bootResponse=bootResponseMatrix.list)))
   } else {
-    structure(invisible(list(df= df.list, bootFStats=bootFStats,
+    structure(invisible(list(terms = termNames, df= df.list, bootFStats=bootFStats,
                              origSSE=SS.list[length(SS.list)], origSSTr=SS.list[1:(length(SS.list)-1)],
                              bootSSE=bootSSEMat, bootSSTr=bootSSTrMat,
-                             origEstParam=estParam, origFStats=obsFStats)))
+                             origFStats=obsFStats, "p-values" = pvalues)))
   }
 }

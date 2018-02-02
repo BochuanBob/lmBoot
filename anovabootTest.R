@@ -12,21 +12,20 @@ remove(s4)
 anova.boot.old <- anova.boot
 source("C:/Users/lub/Documents/R_Courses/anovaGitHub/lmBoot/anovaboot.R")
 
-
 ### Test 1 Basic one (Work Well)
 formula1 <- iris$Sepal.Length~iris$Species
 bootres.new <- anova.boot(formula1, B =1000, seed =27, keep.data=TRUE)
 
 # Test for FTest same as using anova()
 for (i in 1:10) {
-  print(abs(anova(lm(bootres.new$bootResponse[[1]][i,]~iris$Species))$'F value'[1] - bootres.new$bootFStats[i,]) < 10^(-10))
+  print(abs(anova(lm(bootres.new$bootResponse[[1]][i,]~iris$Species))$'F value'[1] - bootres.new$bootFStats[i,1]) < 10^(-10))
 }
 
 hist(bootres.new$bootFStats[, 1])
 # Make sure the result is the same using same seed.
 sum(abs(bootres.new$bootFStats-bootres.old$bootFStats) <= 10^-6) == 1000
 bootres.new$origFStats == bootres.old$origFStats
-bootres.new$origEstParam == bootres.old$origEstParam
+#bootres.new$origEstParam == bootres.old$origEstParam
 
 ### BL: I think the bootEstParam in the online version of anova.boot is incorrect since I have compare the new verson with aov()$coefficients 
 #sum(bootres.new$bootEstParam == bootres.old$bootEstParam) == dim(bootres.old$bootEstParam)[1] * dim(bootres.old$bootEstParam)[2]
@@ -39,7 +38,7 @@ bootres.old <- anova.boot.old(formula2, B =100, seed =27)
 # Make sure the result is the same using same seed.
 sum(abs(bootres.new$bootFStats-bootres.old$bootFStats) <= 10^-6) == 100
 bootres.new$origFStats == bootres.old$origFStats
-bootres.new$origEstParam == bootres.old$origEstParam
+#bootres.new$origEstParam == bootres.old$origEstParam
 
 ### Test 3 data option (Work Well)
 formula3 <- Sepal.Length~Species
@@ -48,7 +47,7 @@ bootres.old <- anova.boot.old(formula1, B =1000, seed =27)
 # Make sure the result is the same using same seed.
 sum(abs(bootres.new$bootFStats-bootres.old$bootFStats) <= 10^-6) == 1000
 bootres.new$origFStats == bootres.old$origFStats
-bootres.new$origEstParam == bootres.old$origEstParam
+#bootres.new$origEstParam == bootres.old$origEstParam
 
 
 ### Test 4 Missing values. Checked how many missing cases for predictors. (Same as cases removed, since response can't have any missing cases)
@@ -105,7 +104,7 @@ for (i in 1:10) {
 formula6 <- mpg~factor(gear)+factor(vs)
 bootres.new <- anova.boot(formula6, data=mtcars, B=1000, seed=27, keep.data = TRUE)
 dim(bootres.new$bootFStats)
-
+bootres.new$`p-values`
 # Test for FTest same as using anova()
 for (i in 1:10) {
   print(abs(anova(lm(bootres.new$bootResponse[[1]][i,]~factor(mtcars$gear)))$'F value'[1] - bootres.new$bootFStats[i,1]) < 10^(-10))
@@ -119,7 +118,11 @@ for (i in 1:10) {
 ### Test 8 two way ANOVA bootstrap * (deal with exact singular cases)
 formula7 <- mpg~factor(cyl)*factor(vs)
 bootres.new <- anova.boot(formula7, data=mtcars, B=1000, seed=27, keep.data = TRUE)
-
+bootres.new$`p-values`
+par(mfrow=c(2,2))
+hist(bootres.new$bootFStats[,1])
+hist(bootres.new$bootFStats[,2])
+hist(bootres.new$bootFStats[,3])
 # Test for FTest same as using anova()
 for (i in 1:10) {
   print(abs(anova(lm(bootres.new$bootResponse[[1]][i,]~factor(mtcars$cyl)))$'F value'[1] - bootres.new$bootFStats[i,1]) < 10^(-10))
