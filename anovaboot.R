@@ -15,14 +15,13 @@
 # distribution choose from "Normal", "Uniform", "LogNorm".
 
 anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", variance=1, seed=NULL, data = NULL, keep.data=FALSE){
-  start <- proc.time()
   ##Check that a formula is input
   if(inherits(formula, "formula")==FALSE){
-    stop("The input model must be a formula.")
+    stop("The input model must be a formula.\n")
   }
   
   if (variance <=0) {
-    stop("Variance should be positive!")
+    stop("Variance should be positive!\n")
   }
   
   
@@ -32,16 +31,16 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
   ### BL: Changed is.atomic -> is.vector, since is.atomic(NULL) -> TRUE.
   ### When someone fit ~Sepal.Length + Sepal.Width + Petal.Length. Response is NULL.
   if(is.matrix(resp)!=TRUE && is.vector(resp)!=TRUE){
-    stop("Response must be a vector or matrix.")
+    stop("Response must be a vector or matrix.\n")
   }
   else if((dim(resp)[1]==0 || dim(resp)[2]==0) && length(resp)==0){
-    stop("Response must have entries.")
+    stop("Response must have entries.\n")
   }
   else if(mode(resp)!="numeric"){
-    stop("Response must be of type numeric.")
+    stop("Response must be of type numeric.\n")
   }
   else if(anyNA(resp)==TRUE){
-    stop("Response must not have any missing values.")
+    stop("Response must not have any missing values.\n")
   }
   #}
   
@@ -53,43 +52,43 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
   
   ##Check that the covariate variables are in the correct format
   if(length(rhs.vars(formula))<1){
-    stop("Linear model must have at least 1 predictor variable.")
+    stop("Linear model must have at least 1 predictor variable.\n")
   }
   
   p <- length(rhs.vars(formula)) #number of covariates, does not include intercept -- does not account for matrices...
   
   if (p > 2) {
-    stop("This function only work for 1 or 2 predictors.")
+    warning("This function only test for 1 or 2 predictors completely.\n")
   }
   
   modelMat <- model.matrix(formula, data=data)[,]
   modelqr <- qr(modelMat)
   if (ncol(modelMat) > modelqr$rank) {
-    warning("The design matrix isn't full column rank.")
+    warning("The design matrix isn't full column rank.\n")
   }
   
   if (modelqr$rank == 1) {
-    stop("Model is same as response~1. Can't do ANOVA test")
+    stop("Model is same as response~1. Can't do ANOVA test\n")
   }
   model.pivot <- modelqr$pivot[1:modelqr$rank]
   
   ##Check that the type of bootstrap is implementable
   if(type!="residual" & type != "wild"){
-    stop("Only residual bootstrap or wild boostrap is allowed for type.")
+    stop("Only residual bootstrap or wild boostrap is allowed for type.\n")
   } 
   
   n <- length(resp)
 
   
   if(mode(B)!="numeric"){
-    stop("Number of bootstrap samples, B, must be of type numeric.")
+    stop("Number of bootstrap samples, B, must be of type numeric.\n")
   }
   else if(is.atomic(B)!=TRUE){
-    stop("Number of bootstrap samples, B, must be a constant.")
+    stop("Number of bootstrap samples, B, must be a constant.\n")
   }
   else if( B < n){
     # Change this to a warning instead
-    warning("Number of bootstrap samples is recommended to be more than the data length.")
+    warning("Number of bootstrap samples is recommended to be more than the data length.\n")
   }
   
   
@@ -99,10 +98,10 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
   }
   else{
     if(mode(seed)!="numeric"){
-      stop("The seed must be of type numeric.")
+      stop("The seed must be of type numeric.\n")
     }
     else if(is.atomic(seed)!=TRUE){
-      stop("The seed must be a constant.")
+      stop("The seed must be a constant.\n")
     }
   }
   set.seed(seed)
@@ -159,7 +158,7 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
   ### Thus, we will know how many cases removed by n-respLen
   
   if (respLen != n) {
-    warning(paste("There are", n - respLen, "missing cases removed!"))
+    warning(paste("There are", n - respLen, "missing cases removed!\n"))
   }
   
   
@@ -247,8 +246,7 @@ anova.boot <- function(formula, B=1000, type="residual", wild.dist="Normal", var
     pvalues[i] <- mean(bootFStats[,i] > obsFStats[i])
   }
   
-  end <- proc.time()
-  print(end-start)
+
   if (keep.data == TRUE) {
     structure(invisible(list(terms = termNames,df = df.list, bootFStats=bootFStats, 
                              origSSE=SS.list[length(SS.list)], origSSTr=SS.list[1:(length(SS.list)-1)],
