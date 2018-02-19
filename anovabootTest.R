@@ -10,7 +10,10 @@ s4 <- getURL("https://raw.githubusercontent.com/elegacy/lm.boot/master/anova.boo
 eval(parse(text=s4))
 remove(s4)
 anova.boot.old <- anova.boot
-source("C:/Users/lub/Documents/R_Courses/anovaGitHub/lmBoot/anovaboot.R")
+s5 <- getURL("https://raw.githubusercontent.com/BochuanBob/lmBoot/master/anovaboot.R",
+             ssl.verifypeer=FALSE)
+eval(parse(text=s5))
+remove(s5)
 
 ### Test 1 Basic one (Work Well)
 formula1 <- iris$Sepal.Length~iris$Species
